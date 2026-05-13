@@ -1,0 +1,35 @@
+class Main {
+    function void main() {
+        var Maze maze1;
+        var Maze2 maze2;
+        var char key;
+
+        // ── Pantalla de inicio ──────────────────────────────────────────
+        do Start.show();
+
+        // ── Nivel 1 ─────────────────────────────────────────────────────
+        do Screen.clearScreen();
+        let maze1 = Maze.new();
+        do maze1.loadMap();
+        do maze1.draw();
+
+        let key = Keyboard.readChar();
+        do maze1.dispose();
+
+        // ── Nivel 2 ─────────────────────────────────────────────────────
+        do Screen.clearScreen();
+        let maze2 = Maze2.new();
+        do maze2.loadMap();
+        do maze2.draw();
+
+        let key = Keyboard.readChar();
+        do maze2.dispose();
+
+        // ── Pantalla de fin ──────────────────────────────────────────────
+        do End.show();
+        let key = Keyboard.readChar();
+        do Screen.clearScreen();
+
+        return;
+    }
+}

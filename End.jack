@@ -1,0 +1,78 @@
+/** Pantalla de fin de juego (laberinto completado).
+ *  Muestra un mensaje de felicitacion.
+ *  Se cierra con la tecla ENTER (codigo 128).
+ */
+class End {
+
+    /** Dibuja la pantalla final y espera ENTER. */
+    function void show() {
+        var char key;
+
+        do Screen.clearScreen();
+        do End.draw();
+
+        // Esperar hasta que el jugador presione ENTER (codigo 128)
+        let key = 0;
+        while (~(key = 128)) {
+            let key = Keyboard.readChar();
+        }
+        return;
+    }
+
+    /** Dibuja todos los elementos visuales de la pantalla de fin. */
+    function void draw() {
+
+        // ── Borde exterior ──────────────────────────────────────────────
+        do Screen.setColor(true);
+        do Screen.drawRectangle(0, 0, 511, 5);
+        do Screen.drawRectangle(0, 250, 511, 255);
+        do Screen.drawRectangle(0, 0, 5, 255);
+        do Screen.drawRectangle(506, 0, 511, 255);
+
+        // ── Decoracion: esquinas ────────────────────────────────────────
+        do Screen.drawRectangle(10, 10, 40, 40);
+        do Screen.drawRectangle(471, 10, 501, 40);
+        do Screen.drawRectangle(10, 215, 40, 245);
+        do Screen.drawRectangle(471, 215, 501, 245);
+
+        // ── Estrella central decorativa (rombo) ─────────────────────────
+        do Screen.drawLine(256, 20, 286, 40);
+        do Screen.drawLine(286, 40, 256, 60);
+        do Screen.drawLine(256, 60, 226, 40);
+        do Screen.drawLine(226, 40, 256, 20);
+
+        // ── Titulo: "FIN" con letras grandes ────────────────────────────
+        // F
+        do Screen.drawRectangle(168, 70, 174, 130);
+        do Screen.drawRectangle(174, 70, 214, 77);
+        do Screen.drawRectangle(174, 98, 208, 104);
+
+        // I
+        do Screen.drawRectangle(224, 70, 254, 77);
+        do Screen.drawRectangle(236, 77, 242, 123);
+        do Screen.drawRectangle(224, 123, 254, 130);
+
+        // N
+        do Screen.drawRectangle(264, 70, 271, 130);
+        do Screen.drawRectangle(297, 70, 304, 130);
+        do Screen.drawRectangle(271, 70, 297, 96);
+
+        // ── Linea separadora ────────────────────────────────────────────
+        do Screen.drawRectangle(60, 140, 451, 143);
+
+        // ── Mensaje de felicitacion ──────────────────────────────────────
+        do Output.moveCursor(13, 12);
+        do Output.printString("Felicitaciones, completaste el laberinto!");
+
+        // ── Mensaje de salida ────────────────────────────────────────────
+        do Output.moveCursor(15, 14);
+        do Output.printString("Presiona ENTER para salir...");
+
+        return;
+    }
+
+    /** Libera la clase (sin estado, solo por convension). */
+    function void dispose() {
+        return;
+    }
+}

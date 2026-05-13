@@ -1,0 +1,108 @@
+/** Pantalla de inicio del juego de laberinto.
+ *  Muestra el titulo y las instrucciones.
+ *  Se avanza con la tecla ENTER (codigo 128).
+ */
+class Start {
+
+    /** Dibuja la pantalla de inicio y espera ENTER. */
+    function void show() {
+        var char key;
+
+        do Screen.clearScreen();
+        do Start.draw();
+
+        // Esperar hasta que el jugador presione ENTER (codigo 128)
+        let key = 0;
+        while (~(key = 128)) {
+            let key = Keyboard.readChar();
+        }
+        return;
+    }
+
+    /** Dibuja todos los elementos visuales del menu. */
+    function void draw() {
+
+        // ── Borde exterior ──────────────────────────────────────────────
+        do Screen.setColor(true);
+        do Screen.drawRectangle(0, 0, 511, 5);      // Borde superior
+        do Screen.drawRectangle(0, 250, 511, 255);   // Borde inferior
+        do Screen.drawRectangle(0, 0, 5, 255);       // Borde izquierdo
+        do Screen.drawRectangle(506, 0, 511, 255);   // Borde derecho
+
+        // ── Titulo: "LABERINTO" (letras grandes pixeladas) ───────────────
+        // Cada letra se construye con drawRectangle para simular un estilo
+        // retro de 8x12 pixeles por glifo, con escala 3x.
+
+        // L
+        do Screen.drawRectangle(40, 50, 46, 98);
+        do Screen.drawRectangle(40, 92, 76, 98);
+
+        // A
+        do Screen.drawRectangle(82, 50, 88, 98);
+        do Screen.drawRectangle(104, 50, 110, 98);
+        do Screen.drawRectangle(88, 50, 104, 56);
+        do Screen.drawRectangle(88, 73, 104, 79);
+
+        // B
+        do Screen.drawRectangle(116, 50, 122, 98);
+        do Screen.drawRectangle(122, 50, 148, 56);
+        do Screen.drawRectangle(144, 50, 150, 73);
+        do Screen.drawRectangle(122, 70, 148, 76);
+        do Screen.drawRectangle(144, 73, 150, 98);
+        do Screen.drawRectangle(122, 92, 148, 98);
+
+        // E
+        do Screen.drawRectangle(156, 50, 162, 98);
+        do Screen.drawRectangle(162, 50, 196, 56);
+        do Screen.drawRectangle(162, 70, 188, 76);
+        do Screen.drawRectangle(162, 92, 196, 98);
+
+        // R
+        do Screen.drawRectangle(202, 50, 208, 98);
+        do Screen.drawRectangle(208, 50, 234, 56);
+        do Screen.drawRectangle(230, 50, 236, 73);
+        do Screen.drawRectangle(208, 70, 234, 76);
+        do Screen.drawRectangle(220, 76, 236, 98);
+
+        // I
+        do Screen.drawRectangle(246, 50, 270, 56);
+        do Screen.drawRectangle(255, 56, 261, 92);
+        do Screen.drawRectangle(246, 92, 270, 98);
+
+        // N
+        do Screen.drawRectangle(276, 50, 282, 98);
+        do Screen.drawRectangle(302, 50, 308, 98);
+        do Screen.drawRectangle(282, 50, 302, 70);
+
+        // T
+        do Screen.drawRectangle(314, 50, 356, 56);
+        do Screen.drawRectangle(332, 56, 338, 98);
+
+        // O
+        do Screen.drawRectangle(366, 50, 406, 56);
+        do Screen.drawRectangle(366, 92, 406, 98);
+        do Screen.drawRectangle(366, 50, 372, 98);
+        do Screen.drawRectangle(400, 50, 406, 98);
+
+        // ── Linea separadora bajo el titulo ─────────────────────────────
+        do Screen.drawRectangle(40, 108, 471, 111);
+
+        // ── Instrucciones ───────────────────────────────────────────────
+        do Output.moveCursor(12, 10);
+        do Output.printString("Controles: Flechas del teclado");
+
+        do Output.moveCursor(13, 10);
+        do Output.printString("Meta: llega al cuadro marcado (salida)");
+
+        // ── Mensaje ENTER ───────────────────────────────────────────────
+        do Output.moveCursor(11, 12);
+        do Output.printString("Presiona ENTER para comenzar...");
+
+        return;
+    }
+
+    /** Libera la clase (sin estado, solo por convension). */
+    function void dispose() {
+        return;
+    }
+}

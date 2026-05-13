@@ -1,0 +1,299 @@
+class Maze {
+    field Array cells;
+    field int rows;
+    field int cols;
+
+    constructor Maze new() {
+        let rows = 16;
+        let cols = 32;
+        let cells = Array.new(512);
+        return this;
+    } //Constructor del laberinto
+
+    method int getCell(int row, int col) {
+        return cells[(row * cols) + col];
+    } //Obtener el valor de la celda 16x16 (0 para camino, 1 para muro y 2 para la salida)
+
+    method void setCell(int row, int col, int value) {
+        let cells[(row * cols) + col] = value;
+        return;
+    } //"Setear" o asignar valores del laberinto
+
+    method boolean canMove(int row, int col) {
+        var int val;
+        let val = getCell(row, col);
+        return ~(val = 1);
+    } //Funcion que permite el movimiento del jugador
+
+    //Codigo exportado desde "Generador Laberinto Jack.HTML"
+    method void loadMap() { 
+        do setCell(0, 0, 1);
+        do setCell(0, 1, 1);
+        do setCell(0, 2, 1);
+        do setCell(0, 3, 1);
+        do setCell(0, 4, 1);
+        do setCell(0, 5, 1);
+        do setCell(0, 6, 1);
+        do setCell(0, 7, 1);
+        do setCell(0, 8, 1);
+        do setCell(0, 9, 1);
+        do setCell(0, 10, 1);
+        do setCell(0, 11, 1);
+        do setCell(0, 12, 1);
+        do setCell(0, 13, 1);
+        do setCell(0, 14, 1);
+        do setCell(0, 15, 1);
+        do setCell(0, 16, 1);
+        do setCell(0, 17, 1);
+        do setCell(0, 18, 1);
+        do setCell(0, 19, 1);
+        do setCell(0, 20, 1);
+        do setCell(0, 21, 1);
+        do setCell(0, 22, 1);
+        do setCell(0, 23, 1);
+        do setCell(0, 24, 1);
+        do setCell(0, 25, 1);
+        do setCell(0, 26, 1);
+        do setCell(0, 27, 1);
+        do setCell(0, 28, 1);
+        do setCell(0, 29, 1);
+        do setCell(0, 30, 1);
+        do setCell(0, 31, 1);
+        do setCell(1, 0, 1);
+        do setCell(1, 31, 1);
+        do setCell(2, 0, 1);
+        do setCell(2, 2, 1);
+        do setCell(2, 3, 1);
+        do setCell(2, 4, 1);
+        do setCell(2, 5, 1);
+        do setCell(2, 6, 1);
+        do setCell(2, 8, 1);
+        do setCell(2, 9, 1);
+        do setCell(2, 10, 1);
+        do setCell(2, 11, 1);
+        do setCell(2, 12, 1);
+        do setCell(2, 13, 1);
+        do setCell(2, 16, 1);
+        do setCell(2, 17, 1);
+        do setCell(2, 18, 1);
+        do setCell(2, 19, 1);
+        do setCell(2, 20, 1);
+        do setCell(2, 23, 1);
+        do setCell(2, 24, 1);
+        do setCell(2, 25, 1);
+        do setCell(2, 26, 1);
+        do setCell(2, 27, 1);
+        do setCell(2, 29, 1);
+        do setCell(2, 31, 1);
+        do setCell(3, 0, 1);
+        do setCell(3, 29, 1);
+        do setCell(3, 31, 1);
+        do setCell(4, 0, 1);
+        do setCell(4, 2, 1);
+        do setCell(4, 6, 1);
+        do setCell(4, 10, 1);
+        do setCell(4, 11, 1);
+        do setCell(4, 12, 1);
+        do setCell(4, 13, 1);
+        do setCell(4, 16, 1);
+        do setCell(4, 20, 1);
+        do setCell(4, 25, 1);
+        do setCell(4, 29, 1);
+        do setCell(4, 30, 1);
+        do setCell(4, 31, 1);
+        do setCell(5, 0, 1);
+        do setCell(5, 2, 1);
+        do setCell(5, 6, 1);
+        do setCell(5, 16, 1);
+        do setCell(5, 20, 1);
+        do setCell(5, 25, 1);
+        do setCell(5, 31, 1);
+        do setCell(6, 0, 1);
+        do setCell(6, 2, 1);
+        do setCell(6, 3, 1);
+        do setCell(6, 4, 1);
+        do setCell(6, 6, 1);
+        do setCell(6, 8, 1);
+        do setCell(6, 9, 1);
+        do setCell(6, 10, 1);
+        do setCell(6, 13, 1);
+        do setCell(6, 14, 1);
+        do setCell(6, 15, 1);
+        do setCell(6, 16, 1);
+        do setCell(6, 20, 1);
+        do setCell(6, 22, 1);
+        do setCell(6, 23, 1);
+        do setCell(6, 24, 1);
+        do setCell(6, 25, 1);
+        do setCell(6, 27, 1);
+        do setCell(6, 28, 1);
+        do setCell(6, 29, 1);
+        do setCell(6, 31, 1);
+        do setCell(7, 0, 1);
+        do setCell(7, 2, 1);
+        do setCell(7, 6, 1);
+        do setCell(7, 20, 1);
+        do setCell(7, 31, 1);
+        do setCell(8, 0, 1);
+        do setCell(8, 2, 1);
+        do setCell(8, 3, 1);
+        do setCell(8, 4, 1);
+        do setCell(8, 5, 1);
+        do setCell(8, 6, 1);
+        do setCell(8, 8, 1);
+        do setCell(8, 9, 1);
+        do setCell(8, 10, 1);
+        do setCell(8, 11, 1);
+        do setCell(8, 12, 1);
+        do setCell(8, 15, 1);
+        do setCell(8, 16, 1);
+        do setCell(8, 17, 1);
+        do setCell(8, 20, 1);
+        do setCell(8, 22, 1);
+        do setCell(8, 23, 1);
+        do setCell(8, 24, 1);
+        do setCell(8, 25, 1);
+        do setCell(8, 28, 1);
+        do setCell(8, 29, 1);
+        do setCell(8, 31, 1);
+        do setCell(9, 0, 1);
+        do setCell(9, 31, 1);
+        do setCell(10, 0, 1);
+        do setCell(10, 2, 1);
+        do setCell(10, 3, 1);
+        do setCell(10, 4, 1);
+        do setCell(10, 7, 1);
+        do setCell(10, 8, 1);
+        do setCell(10, 9, 1);
+        do setCell(10, 10, 1);
+        do setCell(10, 13, 1);
+        do setCell(10, 14, 1);
+        do setCell(10, 15, 1);
+        do setCell(10, 16, 1);
+        do setCell(10, 19, 1);
+        do setCell(10, 20, 1);
+        do setCell(10, 21, 1);
+        do setCell(10, 24, 1);
+        do setCell(10, 25, 1);
+        do setCell(10, 26, 1);
+        do setCell(10, 27, 1);
+        do setCell(10, 31, 1);
+        do setCell(11, 0, 1);
+        do setCell(11, 31, 1);
+        do setCell(12, 0, 1);
+        do setCell(12, 2, 1);
+        do setCell(12, 3, 1);
+        do setCell(12, 4, 1);
+        do setCell(12, 5, 1);
+        do setCell(12, 6, 1);
+        do setCell(12, 9, 1);
+        do setCell(12, 10, 1);
+        do setCell(12, 11, 1);
+        do setCell(12, 12, 1);
+        do setCell(12, 15, 1);
+        do setCell(12, 16, 1);
+        do setCell(12, 17, 1);
+        do setCell(12, 18, 1);
+        do setCell(12, 21, 1);
+        do setCell(12, 22, 1);
+        do setCell(12, 23, 1);
+        do setCell(12, 26, 1);
+        do setCell(12, 27, 1);
+        do setCell(12, 28, 1);
+        do setCell(12, 29, 1);
+        do setCell(12, 31, 1);
+        do setCell(13, 0, 1);
+        do setCell(13, 2, 1);
+        do setCell(13, 6, 1);
+        do setCell(13, 12, 1);
+        do setCell(13, 18, 1);
+        do setCell(13, 23, 1);
+        do setCell(13, 31, 1);
+        do setCell(14, 0, 1);
+        do setCell(14, 6, 1);
+        do setCell(14, 12, 1);
+        do setCell(14, 18, 1);
+        do setCell(14, 23, 1);
+        do setCell(14, 30, 2);
+        do setCell(14, 31, 1);
+        do setCell(15, 0, 1);
+        do setCell(15, 1, 1);
+        do setCell(15, 2, 1);
+        do setCell(15, 3, 1);
+        do setCell(15, 4, 1);
+        do setCell(15, 5, 1);
+        do setCell(15, 6, 1);
+        do setCell(15, 7, 1);
+        do setCell(15, 8, 1);
+        do setCell(15, 9, 1);
+        do setCell(15, 10, 1);
+        do setCell(15, 11, 1);
+        do setCell(15, 12, 1);
+        do setCell(15, 13, 1);
+        do setCell(15, 14, 1);
+        do setCell(15, 15, 1);
+        do setCell(15, 16, 1);
+        do setCell(15, 17, 1);
+        do setCell(15, 18, 1);
+        do setCell(15, 19, 1);
+        do setCell(15, 20, 1);
+        do setCell(15, 21, 1);
+        do setCell(15, 22, 1);
+        do setCell(15, 23, 1);
+        do setCell(15, 24, 1);
+        do setCell(15, 25, 1);
+        do setCell(15, 26, 1);
+        do setCell(15, 27, 1);
+        do setCell(15, 28, 1);
+        do setCell(15, 29, 1);
+        do setCell(15, 30, 1);
+        do setCell(15, 31, 1);
+        return;
+    }
+
+    //Metodo de dibujo en pantalla
+    method void draw() {
+        var int r, c, val, x, y;
+        let r = 0;
+        while (r < rows) { //Ciclo de recorrido de celdas por celdas simuladas en un array 
+            let c = 0;
+            while (c < cols) {
+                let val = getCell(r, c);
+                let x = c * 16;
+                let y = r * 16;
+                if (val = 1) {
+                    //Dibujar el rectangulo en la celda de 16x16
+                    do Screen.setColor(true);
+                    do Screen.drawRectangle(x, y, x + 15, y + 15);
+                }
+                if (val = 0) {
+                    do Screen.setColor(false);
+                    do Screen.drawRectangle(x, y, x + 15, y + 15);
+                    //Bordeado Negro
+                    do Screen.setColor(true);
+                    do Screen.drawLine(x, y, x + 15, y);          // Arriba
+                    do Screen.drawLine(x, y + 15, x + 15, y + 15); // Abajo
+                    do Screen.drawLine(x, y, x, y + 15);           // Izquierda
+                    do Screen.drawLine(x + 15, y, x + 15, y + 15); // Derecha
+                }
+                if (val = 2) {
+                    //Se dibuja un rectangulo pequeño en pantalla
+                    do Screen.setColor(false);
+                    do Screen.drawRectangle(x, y, x + 15, y + 15);
+                    do Screen.setColor(true);
+                    do Screen.drawRectangle(x + 4, y + 4, x + 11, y + 11);
+                }
+                let c = c + 1;
+            }
+            let r = r + 1;
+        }
+        return;
+    }
+
+    //Metodo de recolector de basura
+    method void dispose() {
+        do cells.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}
