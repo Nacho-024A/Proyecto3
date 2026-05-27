@@ -1,35 +1,175 @@
 class Main {
     function void main() {
-        var Maze maze1;
+        var Maze  maze1;
         var Maze2 maze2;
-        var char key;
+        var Player player;
+        var Array  enemies;     // array de Enemy
+        var Enemy  e;
+        var char   key;
+        var char   prevKey;
+        var int    enemyCounter;
+        var int    enemySpeed;
+        var int    i;
+        var boolean running;
+        var boolean caught;
 
-        // ── Pantalla de inicio ──────────────────────────────────────────
-        do Start.show();
+        // ── Menu de inicio ───────────────────────────────────────────────
+        let enemySpeed = Start.show();
 
-        // ── Nivel 1 ─────────────────────────────────────────────────────
+        // ---------------------------------
+        // NIVEL 1 — 1 enemigo, usa Maze
+        // ---------------------------------
         do Screen.clearScreen();
         let maze1 = Maze.new();
         do maze1.loadMap();
         do maze1.draw();
 
-        let key = Keyboard.readChar();
+        do Output.moveCursor(0, 1);
+        do Output.printString("Nivel 1");
+
+        let player = Player.new(1, 1);
+
+        let enemies = Array.new(1);
+        let enemies[0] = Enemy.new(14, 28);
+
+        let e = enemies[0];
+        do player.draw(true);
+        do e.draw(true);
+
+        let running      = true;
+        let caught       = false;
+        let prevKey      = 0;
+        let enemyCounter = 0;
+
+        while (running) {
+            let key = Keyboard.keyPressed();
+
+            if (~(key = prevKey)) {
+                if (key = 131) { do player.move(player.getRow() - 1, player.getCol(),     maze1); }
+                if (key = 133) { do player.move(player.getRow() + 1, player.getCol(),     maze1); }
+                if (key = 130) { do player.move(player.getRow(),     player.getCol() - 1, maze1); }
+                if (key = 132) { do player.move(player.getRow(),     player.getCol() + 1, maze1); }
+            }
+            let prevKey = key;
+
+            let enemyCounter = enemyCounter + 1;
+            if (enemyCounter = enemySpeed) {
+                let enemyCounter = 0;
+                let e = enemies[0];
+                do e.move(player.getRow(), player.getCol(), maze1);
+            }
+
+            // Chequear captura
+            let e = enemies[0];
+            if (e.isCaught(player.getRow(), player.getCol())) {
+                let running = false;
+                let caught  = true;
+            }
+
+            if (maze1.getCell(player.getRow(), player.getCol()) = 2) {
+                let running = false;
+            }
+
+            do Sys.wait(100);
+        }
+
+        do player.dispose();
+        let e = enemies[0];
+        do e.dispose();
+        do enemies.dispose();
         do maze1.dispose();
 
-        // ── Nivel 2 ─────────────────────────────────────────────────────
+        if (caught) { do GameOver.show(); return; }
+
+        // ── Transicion ──────────────────────────────────────────────────
+        do Screen.clearScreen();
+        do Output.moveCursor(10, 18);
+        do Output.printString("- Nivel 2 -");
+        do Output.moveCursor(12, 14);
+        do Output.printString("Presiona ENTER para continuar...");
+        let key = 0;
+        while (~(key = 128)) { let key = Keyboard.readChar(); }
+
+        // ---------------------------------
+        // NIVEL 2 — 2 enemigos, usa Maze2
+        // ---------------------------------
         do Screen.clearScreen();
         let maze2 = Maze2.new();
         do maze2.loadMap();
         do maze2.draw();
 
-        let key = Keyboard.readChar();
+        do Output.moveCursor(0, 1);
+        do Output.printString("Nivel 2");
+
+        let player = Player.new(1, 1);
+
+        let enemies = Array.new(2);
+        let enemies[0] = Enemy.new(13, 28);
+        let enemies[1] = Enemy.new(13,  1);
+
+        let e = enemies[0]; do e.draw(true);
+        let e = enemies[1]; do e.draw(true);
+        do player.draw(true);
+
+        let running      = true;
+        let caught       = false;
+        let prevKey      = 0;
+        let enemyCounter = 0;
+
+        while (running) {
+            let key = Keyboard.keyPressed();
+
+            if (~(key = prevKey)) {
+                if (key = 131) { do player.move(player.getRow() - 1, player.getCol(),     maze2); }
+                if (key = 133) { do player.move(player.getRow() + 1, player.getCol(),     maze2); }
+                if (key = 130) { do player.move(player.getRow(),     player.getCol() - 1, maze2); }
+                if (key = 132) { do player.move(player.getRow(),     player.getCol() + 1, maze2); }
+            }
+            let prevKey = key;
+
+            let enemyCounter = enemyCounter + 1;
+            if (enemyCounter = (enemySpeed - 2)) {
+                let enemyCounter = 0;
+                let i = 0;
+                while (i < 2) {
+                    let e = enemies[i];
+                    do e.move2(player.getRow(), player.getCol(), maze2);
+                    let i = i + 1;
+                }
+            }
+
+            // Chequear captura por cualquier enemigo
+            let caught = false;
+            let i = 0;
+            while (i < 2) {
+                let e = enemies[i];
+                if (e.isCaught(player.getRow(), player.getCol())) {
+                    let caught  = true;
+                    let running = false;
+                }
+                let i = i + 1;
+            }
+
+            if (maze2.getCell(player.getRow(), player.getCol()) = 2) {
+                let running = false;
+            }
+
+            do Sys.wait(100);
+        }
+
+        do player.dispose();
+        let i = 0;
+        while (i < 2) {
+            let e = enemies[i];
+            do e.dispose();
+            let i = i + 1;
+        }
+        do enemies.dispose();
         do maze2.dispose();
 
-        // ── Pantalla de fin ──────────────────────────────────────────────
-        do End.show();
-        let key = Keyboard.readChar();
-        do Screen.clearScreen();
+        if (caught) { do GameOver.show(); return; }
 
+        do End.show();
         return;
     }
 }

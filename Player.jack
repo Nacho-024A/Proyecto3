@@ -1,0 +1,61 @@
+class Player {
+    field int row, col;
+
+    constructor Player new(int startRow, int startCol) {
+        let row = startRow;
+        let col = startCol;
+        return this;
+    }
+
+    method int getRow() { return row; }
+    method int getCol() { return col; }
+
+    method void draw(boolean color) {
+        var int x, y;
+        let x = col * 16;
+        let y = row * 16;
+        do Screen.setColor(color);
+
+        // ── Cabeza ─────────────────────────────────────────
+        do Screen.drawLine(x+6,  y+2,  x+9,  y+2);   // (6,2,9,2)
+        do Screen.drawLine(x+5,  y+3,  x+5,  y+5);   // (5,3,5,5)
+        do Screen.drawLine(x+6,  y+6,  x+9,  y+6);   // (6,6,9,6)
+        do Screen.drawLine(x+10, y+3,  x+10, y+5);   // (10,3,10,5)
+
+        // ── Torso ──────────────────────────────────────────
+        do Screen.drawLine(x+7,  y+7,  x+8,  y+11);  // (7,7,8,11)
+
+        // ── Brazo derecho ──────────────────────────────────
+        do Screen.drawLine(x+9,  y+8,  x+11, y+8);   // (9,8,11,8)
+        do Screen.drawLine(x+11, y+6,  x+11, y+7);   // (11,6,11,7)
+
+        // ── Brazo izquierdo ────────────────────────────────
+        do Screen.drawLine(x+4,  y+8,  x+6,  y+8);   // (4,8,6,8)
+        do Screen.drawLine(x+4,  y+9,  x+4,  y+10);  // (4,9,4,10)
+
+        // ── Pie derecho ────────────────────────────────────
+        do Screen.drawLine(x+9,  y+11, x+9,  y+13);  // (9,11,9,13)
+        do Screen.drawPixel(x+10, y+13);              // (10,13)
+
+        // ── Pie izquierdo ──────────────────────────────────
+        do Screen.drawLine(x+6,  y+11, x+6,  y+13);  // (6,11,6,13)
+        do Screen.drawPixel(x+5, y+13);               // (5,13)
+
+        return;
+    }
+
+    method void move(int newRow, int newCol, Maze maze) {
+        if (maze.canMove(newRow, newCol)) {
+            do draw(false);
+            let row = newRow;
+            let col = newCol;
+            do draw(true);
+        }
+        return;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

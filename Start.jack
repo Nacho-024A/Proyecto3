@@ -1,107 +1,312 @@
-/** Pantalla de inicio del juego de laberinto.
- *  Muestra el titulo y las instrucciones.
- *  Se avanza con la tecla ENTER (codigo 128).
+/** Pantalla de inicio con menu interactivo.
+ *
+ *  Opciones:
+ *    0 - Iniciar
+ *    1 - Configuracion (velocidad del enemigo)
+ *    2 - Salir
+ *
+ *  Navegacion: flechas arriba/abajo para mover el cursor,
+ *              ENTER (codigo 128) para confirmar.
+ *
+ *  Retorna la velocidad elegida (ciclos entre movimientos del enemigo):
+ *    Lento  = 8
+ *    Normal = 6  (por defecto)
+ *    Rapido = 4
  */
 class Start {
 
-    /** Dibuja la pantalla de inicio y espera ENTER. */
-    function void show() {
+    // ── Constantes de navegacion ────────────────────────────────────────
+    // Jack no tiene static const, se usan metodos auxiliares privados.
+    // Codigos de tecla: arriba=131, abajo=133, ENTER=128
+
+    /** Muestra el menu principal y retorna la velocidad configurada.
+     *  Devuelve -1 si el usuario eligio Salir. */
+    function int show() {
+        var int selected;   // opcion resaltada: 0=Iniciar 1=Config 2=Salir
+        var int speed;      // ciclos entre movimientos del enemigo
         var char key;
+        var char prevKey;
+        var boolean choosing;
+
+        let selected  = 0;
+        let speed     = 6;  // Normal por defecto
+        let prevKey   = 0;
+        let choosing  = true;
 
         do Screen.clearScreen();
-        do Start.draw();
+        do Start.drawFrame();
+        do Start.drawTitle();
+        do Start.drawMenu(selected, speed);
 
-        // Esperar hasta que el jugador presione ENTER (codigo 128)
-        let key = 0;
-        while (~(key = 128)) {
-            let key = Keyboard.readChar();
+        while (choosing) {
+            let key = Keyboard.keyPressed();
+
+            if (~(key = prevKey)) {
+
+                // ── Flecha arriba ────────────────────────────────────────
+                if (key = 131) {
+                    do Start.eraseSelector(selected);
+                    let selected = selected - 1;
+                    if (selected < 0) { let selected = 2; }
+                    do Start.drawSelector(selected);
+                }
+
+                // ── Flecha abajo ─────────────────────────────────────────
+                if (key = 133) {
+                    do Start.eraseSelector(selected);
+                    let selected = selected + 1;
+                    if (selected > 2) { let selected = 0; }
+                    do Start.drawSelector(selected);
+                }
+
+                // ── ENTER ────────────────────────────────────────────────
+                if (key = 128) {
+                    if (selected = 0) { let choosing = false; }          // Iniciar
+                    if (selected = 1) {                                   // Configuracion
+                        let speed = Start.showConfig(speed);
+                        do Screen.clearScreen();
+                        do Start.drawFrame();
+                        do Start.drawTitle();
+                        do Start.drawMenu(selected, speed);
+                    }
+                    if (selected = 2) { do Sys.halt(); }                 // Salir
+                }
+            }
+
+            let prevKey = key;
+            do Sys.wait(50);
         }
+
+        return speed;
+    }
+
+    // -----------------------------------
+    // SUBMENÚ DE CONFIGURACIÓN
+    // -----------------------------------
+
+    /** Muestra el submenu de velocidad y retorna la velocidad elegida. */
+    function int showConfig(int currentSpeed) {
+        var int sel;
+        var char key;
+        var char prevKey;
+        var boolean choosing;
+
+        // Convertir velocidad actual a indice: 8->0, 6->1, 4->2
+        if (currentSpeed = 8) { let sel = 0; }
+        if (currentSpeed = 6) { let sel = 1; }
+        if (currentSpeed = 4) { let sel = 2; }
+
+        let prevKey  = 0;
+        let choosing = true;
+
+        do Screen.clearScreen();
+        do Start.drawFrame();
+        do Start.drawConfigMenu(sel);
+
+        while (choosing) {
+            let key = Keyboard.keyPressed();
+
+            if (~(key = prevKey)) {
+                if (key = 131) {
+                    do Start.eraseConfigSelector(sel);
+                    let sel = sel - 1;
+                    if (sel < 0) { let sel = 2; }
+                    do Start.drawConfigSelector(sel);
+                }
+                if (key = 133) {
+                    do Start.eraseConfigSelector(sel);
+                    let sel = sel + 1;
+                    if (sel > 2) { let sel = 0; }
+                    do Start.drawConfigSelector(sel);
+                }
+                if (key = 128) { let choosing = false; }  // ENTER confirma
+            }
+
+            let prevKey = key;
+            do Sys.wait(50);
+        }
+
+        // Convertir indice a ciclos
+        if (sel = 0) { return 8; }
+        if (sel = 1) { return 6; }
+        return 4;
+    }
+
+    // -----------------------------------
+    // DIBUJO — MENU PRINCIPAL
+    // -----------------------------------
+
+    /** Dibuja el marco exterior de la pantalla. */
+    function void drawFrame() {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(0,   0,   511, 5);    // superior
+        do Screen.drawRectangle(0,   250, 511, 255);  // inferior
+        do Screen.drawRectangle(0,   0,   5,   255);  // izquierdo
+        do Screen.drawRectangle(506, 0,   511, 255);  // derecho
+        // esquinas decorativas
+        do Screen.drawRectangle(10, 10, 30, 30);
+        do Screen.drawRectangle(481, 10, 501, 30);
+        do Screen.drawRectangle(10, 220, 30, 240);
+        do Screen.drawRectangle(481, 220, 501, 240);
         return;
     }
 
-    /** Dibuja todos los elementos visuales del menu. */
-    function void draw() {
-
-        // ── Borde exterior ──────────────────────────────────────────────
+    /** Dibuja el titulo MAZE en pixelart grande con INTELLIGENCE alineado. */
+    function void drawTitle() {
         do Screen.setColor(true);
-        do Screen.drawRectangle(0, 0, 511, 5);      // Borde superior
-        do Screen.drawRectangle(0, 250, 511, 255);   // Borde inferior
-        do Screen.drawRectangle(0, 0, 5, 255);       // Borde izquierdo
-        do Screen.drawRectangle(506, 0, 511, 255);   // Borde derecho
 
-        // ── Titulo: "LABERINTO" (letras grandes pixeladas) ───────────────
-        // Cada letra se construye con drawRectangle para simular un estilo
-        // retro de 8x12 pixeles por glifo, con escala 3x.
-
-        // L
-        do Screen.drawRectangle(40, 50, 46, 98);
-        do Screen.drawRectangle(40, 92, 76, 98);
+        // M
+        do Screen.drawRectangle(55,  16, 61,  64);
+        do Screen.drawRectangle(109, 16, 115, 64);
+        do Screen.drawRectangle(61,  16, 85,  32);
+        do Screen.drawRectangle(85,  16, 109, 32);
 
         // A
-        do Screen.drawRectangle(82, 50, 88, 98);
-        do Screen.drawRectangle(104, 50, 110, 98);
-        do Screen.drawRectangle(88, 50, 104, 56);
-        do Screen.drawRectangle(88, 73, 104, 79);
+        do Screen.drawRectangle(125, 16, 131, 64);
+        do Screen.drawRectangle(155, 16, 161, 64);
+        do Screen.drawRectangle(131, 16, 155, 22);
+        do Screen.drawRectangle(131, 39, 155, 45);
 
-        // B
-        do Screen.drawRectangle(116, 50, 122, 98);
-        do Screen.drawRectangle(122, 50, 148, 56);
-        do Screen.drawRectangle(144, 50, 150, 73);
-        do Screen.drawRectangle(122, 70, 148, 76);
-        do Screen.drawRectangle(144, 73, 150, 98);
-        do Screen.drawRectangle(122, 92, 148, 98);
+        // Z
+        do Screen.drawRectangle(171, 16, 211, 22);
+        do Screen.drawRectangle(171, 58, 211, 64);
+        do Screen.drawRectangle(201, 22, 211, 40);
+        do Screen.drawRectangle(171, 40, 181, 58);
 
         // E
-        do Screen.drawRectangle(156, 50, 162, 98);
-        do Screen.drawRectangle(162, 50, 196, 56);
-        do Screen.drawRectangle(162, 70, 188, 76);
-        do Screen.drawRectangle(162, 92, 196, 98);
+        do Screen.drawRectangle(221, 16, 227, 64);
+        do Screen.drawRectangle(227, 16, 265, 22);
+        do Screen.drawRectangle(227, 39, 257, 45);
+        do Screen.drawRectangle(227, 58, 265, 64);
 
-        // R
-        do Screen.drawRectangle(202, 50, 208, 98);
-        do Screen.drawRectangle(208, 50, 234, 56);
-        do Screen.drawRectangle(230, 50, 236, 73);
-        do Screen.drawRectangle(208, 70, 234, 76);
-        do Screen.drawRectangle(220, 76, 236, 98);
+        // INTELLIGENCE alineado a la derecha del titulo
+        do Output.moveCursor(2, 34);
+        do Output.printString("INTELLIGENCE");
 
-        // I
-        do Screen.drawRectangle(246, 50, 270, 56);
-        do Screen.drawRectangle(255, 56, 261, 92);
-        do Screen.drawRectangle(246, 92, 270, 98);
+        // Linea bajo INTELLIGENCE
+        do Screen.drawRectangle(272, 57, 463, 60);
 
-        // N
-        do Screen.drawRectangle(276, 50, 282, 98);
-        do Screen.drawRectangle(302, 50, 308, 98);
-        do Screen.drawRectangle(282, 50, 302, 70);
-
-        // T
-        do Screen.drawRectangle(314, 50, 356, 56);
-        do Screen.drawRectangle(332, 56, 338, 98);
-
-        // O
-        do Screen.drawRectangle(366, 50, 406, 56);
-        do Screen.drawRectangle(366, 92, 406, 98);
-        do Screen.drawRectangle(366, 50, 372, 98);
-        do Screen.drawRectangle(400, 50, 406, 98);
-
-        // ── Linea separadora bajo el titulo ─────────────────────────────
-        do Screen.drawRectangle(40, 108, 471, 111);
-
-        // ── Instrucciones ───────────────────────────────────────────────
-        do Output.moveCursor(12, 10);
-        do Output.printString("Controles: Flechas del teclado");
-
-        do Output.moveCursor(13, 10);
-        do Output.printString("Meta: llega al cuadro marcado (salida)");
-
-        // ── Mensaje ENTER ───────────────────────────────────────────────
-        do Output.moveCursor(11, 12);
-        do Output.printString("Presiona ENTER para comenzar...");
-
+        // Separador horizontal principal
+        do Screen.drawRectangle(40, 76, 471, 79);
         return;
     }
 
-    /** Libera la clase (sin estado, solo por convension). */
+    /** Dibuja las tres opciones del menu y el selector en la opcion activa. */
+    function void drawMenu(int selected, int speed) {
+        var String speedLabel;
+
+        // Opciones fijas
+        do Output.moveCursor(10, 22);
+        do Output.printString("Iniciar");
+
+        do Output.moveCursor(12, 22);
+        do Output.printString("Configuracion");
+
+        do Output.moveCursor(14, 22);
+        do Output.printString("Salir");
+
+        // Velocidad actual entre parentesis junto a Configuracion
+        do Output.moveCursor(12, 36);
+        if (speed = 8) { do Output.printString("[Lento] "); }
+        if (speed = 6) { do Output.printString("[Normal]"); }
+        if (speed = 4) { do Output.printString("[Rapido]"); }
+
+        // Separadores finos entre opciones
+        do Screen.setColor(true);
+        do Screen.drawLine(148, 120, 380, 120);
+        do Screen.drawLine(148, 142, 380, 142);
+
+        // Instruccion inferior
+        do Output.moveCursor(15, 18);
+        do Output.printString("[ flechas ] navegar  [ ENTER ] ok");
+
+        // Selector inicial
+        do Start.drawSelector(selected);
+        return;
+    }
+
+    /** Dibuja el triangulo selector (▶) frente a la opcion indicada. */
+    function void drawSelector(int option) {
+        var int row, x, y;
+        // filas de cursor: opcion 0 -> fila 10, opcion 1 -> fila 12, opcion 2 -> fila 14
+        // columna 19 del output = x ~ 152, cada fila output ~ 11px
+        let row = 10 + (option * 2);  // filas 10, 12, 14
+        let x = 148;
+        let y = (row * 11) + 1;
+        do Screen.setColor(true);
+        // triangulo apuntando derecha: 3 lineas
+        do Screen.drawLine(x,   y+1, x,   y+7);
+        do Screen.drawLine(x+1, y+2, x+1, y+6);
+        do Screen.drawLine(x+2, y+3, x+2, y+5);
+        do Screen.drawPixel(x+3, y+4);
+        return;
+    }
+
+    /** Borra el selector de la opcion indicada. */
+    function void eraseSelector(int option) {
+        var int row, x, y;
+        let row = 10 + (option * 2);
+        let x = 148;
+        let y = (row * 11) + 1;
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x+4, y+8);
+        return;
+    }
+
+    // -----------------------------------
+    // DIBUJO — SUBMENÚ CONFIGURACIÓN
+    // -----------------------------------
+
+    /** Dibuja el submenu de seleccion de velocidad. */
+    function void drawConfigMenu(int sel) {
+        do Output.moveCursor(4, 18);
+        do Output.printString("-- CONFIGURACION --");
+
+        do Output.moveCursor(7, 16);
+        do Output.printString("Velocidad del enemigo:");
+
+        do Output.moveCursor(10, 22);
+        do Output.printString("Lento  (facil)");
+
+        do Output.moveCursor(12, 22);
+        do Output.printString("Normal (recomendado)");
+
+        do Output.moveCursor(14, 22);
+        do Output.printString("Rapido (dificil)");
+
+        do Output.moveCursor(16, 16);
+        do Output.printString("ENTER para confirmar y volver");
+
+        do Start.drawConfigSelector(sel);
+        return;
+    }
+
+    /** Dibuja el selector en el submenu de configuracion. */
+    function void drawConfigSelector(int option) {
+        var int x, y, row;
+        let row = 10 + (option * 2);
+        let x = 148;
+        let y = (row * 11) + 1;
+        do Screen.setColor(true);
+        do Screen.drawLine(x,   y+1, x,   y+7);
+        do Screen.drawLine(x+1, y+2, x+1, y+6);
+        do Screen.drawLine(x+2, y+3, x+2, y+5);
+        do Screen.drawPixel(x+3, y+4);
+        return;
+    }
+
+    /** Borra el selector en el submenu de configuracion. */
+    function void eraseConfigSelector(int option) {
+        var int x, y, row;
+        let row = 10 + (option * 2);
+        let x = 148;
+        let y = (row * 11) + 1;
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x+4, y+8);
+        return;
+    }
+
+    /** Libera la clase (sin estado, solo por convencion). */
     function void dispose() {
         return;
     }

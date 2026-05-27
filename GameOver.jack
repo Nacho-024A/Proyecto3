@@ -1,0 +1,107 @@
+/** Pantalla de Game Over — se muestra cuando el enemigo captura al jugador.
+ *  El jugador puede presionar ENTER para salir.
+ */
+class GameOver {
+
+    /** Muestra la pantalla de derrota y espera ENTER. */
+    function void show() {
+        var char key;
+
+        do Screen.clearScreen();
+        do GameOver.draw();
+
+        let key = 0;
+        while (~(key = 128)) {
+            let key = Keyboard.readChar();
+        }
+        do Screen.clearScreen();
+        return;
+    }
+
+    /** Dibuja todos los elementos visuales de la pantalla de derrota. */
+    function void draw() {
+
+        // ── Borde exterior ──────────────────────────────────────────────
+        do Screen.setColor(true);
+        do Screen.drawRectangle(0,   0,   511, 5);
+        do Screen.drawRectangle(0,   250, 511, 255);
+        do Screen.drawRectangle(0,   0,   5,   255);
+        do Screen.drawRectangle(506, 0,   511, 255);
+
+        // ── Esquinas decorativas ────────────────────────────────────────
+        do Screen.drawRectangle(10, 10, 30, 30);
+        do Screen.drawRectangle(481, 10, 501, 30);
+        do Screen.drawRectangle(10, 220, 30, 240);
+        do Screen.drawRectangle(481, 220, 501, 240);
+
+        // ── Titulo: "GAME OVER" con letras grandes ──────────────────────
+
+        // G
+        do Screen.drawRectangle(30,  55, 66,  61);
+        do Screen.drawRectangle(30,  55, 36,  115);
+        do Screen.drawRectangle(30,  109, 66, 115);
+        do Screen.drawRectangle(48,  85, 66,  91);
+        do Screen.drawRectangle(60,  91, 66,  115);
+
+        // A
+        do Screen.drawRectangle(76,  55, 82,  115);
+        do Screen.drawRectangle(106, 55, 112, 115);
+        do Screen.drawRectangle(82,  55, 106, 61);
+        do Screen.drawRectangle(82,  83, 106, 89);
+
+        // M
+        do Screen.drawRectangle(122, 55, 128, 115);
+        do Screen.drawRectangle(170, 55, 176, 115);
+        do Screen.drawRectangle(128, 55, 148, 71);
+        do Screen.drawRectangle(148, 55, 170, 71);
+
+        // E
+        do Screen.drawRectangle(186, 55, 192, 115);
+        do Screen.drawRectangle(192, 55, 228, 61);
+        do Screen.drawRectangle(192, 83, 220, 89);
+        do Screen.drawRectangle(192, 109, 228, 115);
+
+        // O
+        do Screen.drawRectangle(258, 55, 298, 61);
+        do Screen.drawRectangle(258, 109, 298, 115);
+        do Screen.drawRectangle(258, 55, 264, 115);
+        do Screen.drawRectangle(292, 55, 298, 115);
+
+        // V
+        do Screen.drawRectangle(308, 55, 314, 95);
+        do Screen.drawRectangle(344, 55, 350, 95);
+        do Screen.drawRectangle(314, 89, 328, 115);
+        do Screen.drawRectangle(328, 89, 344, 115);
+
+        // E
+        do Screen.drawRectangle(360, 55, 366, 115);
+        do Screen.drawRectangle(366, 55, 402, 61);
+        do Screen.drawRectangle(366, 83, 394, 89);
+        do Screen.drawRectangle(366, 109, 402, 115);
+
+        // R
+        do Screen.drawRectangle(412, 55, 418, 115);
+        do Screen.drawRectangle(418, 55, 448, 61);
+        do Screen.drawRectangle(444, 55, 450, 83);
+        do Screen.drawRectangle(418, 83, 444, 89);
+        do Screen.drawRectangle(432, 89, 450, 115);
+
+        // ── Linea separadora ────────────────────────────────────────────
+        do Screen.drawRectangle(60, 125, 451, 128);
+
+        // ── Mensaje ──────────────────────────────────────────────────────
+        do Output.moveCursor(14, 15);
+        do Output.printString("El enemigo te ha capturado...");
+
+        // ── Instruccion de salida ────────────────────────────────────────
+        do Output.moveCursor(16, 17);
+        do Output.printString("Presiona ENTER para salir");
+
+        return;
+    }
+
+    /** Libera la clase (sin estado, solo por convencion). */
+    function void dispose() {
+        return;
+    }
+}

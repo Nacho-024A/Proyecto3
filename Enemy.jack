@@ -1,0 +1,232 @@
+/** Enemigo con navegacion BFS (Breadth-First Search).
+ *
+ *  Todos los arrays (queue, parent, visited, dRow, dCol) se crean
+ *  UNA SOLA VEZ en el constructor y se reutilizan cada turno,
+ *  evitando fragmentacion del heap con multiples enemigos.
+ *
+ *  Codificacion de celda: id = row * 32 + col  (grid 16x32 = 512 celdas)
+ */
+class Enemy {
+    field int row, col;
+
+    // ── Buffers BFS — creados una vez, reutilizados siempre ─────────────
+    field Array queue;      // cola de ids de celda
+    field Array parent;     // parent[id] = id del padre (-1 = sin padre)
+    field Array visited;    // visited[id] = 0/1
+    field Array dRow;       // deltas de fila para las 4 direcciones
+    field Array dCol;       // deltas de columna para las 4 direcciones
+
+    constructor Enemy new(int startRow, int startCol) {
+        let row = startRow;
+        let col = startCol;
+
+        let queue   = Array.new(512);
+        let parent  = Array.new(512);
+        let visited = Array.new(512);
+
+        // Direcciones: arriba, abajo, izquierda, derecha
+        let dRow = Array.new(4);
+        let dCol = Array.new(4);
+        let dRow[0] = -1;  let dCol[0] =  0;
+        let dRow[1] =  1;  let dCol[1] =  0;
+        let dRow[2] =  0;  let dCol[2] = -1;
+        let dRow[3] =  0;  let dCol[3] =  1;
+
+        return this;
+    }
+
+    method int getRow() { return row; }
+    method int getCol() { return col; }
+
+    // -------------------------------
+    // DIBUJO
+    // -------------------------------
+
+    method void draw(boolean color) {
+        var int x, y;
+        let x = col * 16;
+        let y = row * 16;
+        do Screen.setColor(color);
+
+        do Screen.drawLine(x+3,  y+2,  x+12, y+2);
+        do Screen.drawLine(x+2,  y+3,  x+2,  y+7);
+        do Screen.drawLine(x+13, y+3,  x+13, y+7);
+        do Screen.drawPixel(x+3,  y+9);
+        do Screen.drawPixel(x+12, y+8);
+        do Screen.drawLine(x+4,  y+9,  x+4,  y+12);
+        do Screen.drawLine(x+11, y+9,  x+11, y+12);
+        do Screen.drawLine(x+4,  y+12, x+11, y+12);
+
+        do Screen.drawLine(x+4,  y+4,  x+6,  y+4);
+        do Screen.drawPixel(x+5, y+5);
+        do Screen.drawLine(x+9,  y+4,  x+11, y+4);
+        do Screen.drawPixel(x+10, y+5);
+
+        do Screen.drawLine(x+5,  y+10, x+10, y+10);
+        do Screen.drawPixel(x+6, y+11);
+        do Screen.drawPixel(x+9, y+11);
+
+        return;
+    }
+
+    // -------------------------------
+    // BFS INTERNO — logica compartida, sin new/dispose de arrays
+    // -------------------------------
+
+    /** Inicializa los buffers y encola el nodo inicial. */
+    method int bfsInit() {
+        var int i, startId;
+        let startId = (row * 32) + col;
+        let i = 0;
+        while (i < 512) {
+            let visited[i] = 0;
+            let parent[i]  = -1;
+            let i = i + 1;
+        }
+        let queue[0]       = startId;
+        let visited[startId] = 1;
+        return startId;
+    }
+
+    /** Reconstruye el camino desde targetId hasta startId
+     *  y retorna el primer paso desde startId. */
+    method int bfsReconstruct(int targetId, int startId) {
+        var int i;
+        let i = targetId;
+        while (~(parent[i] = startId)) {
+            let i = parent[i];
+            if (i = -1) { return startId; }
+        }
+        return i;
+    }
+
+    // -------------------------------
+    // BFS — Nivel 1 (Maze)
+    // -------------------------------
+
+    method int bfsNextStep(int playerRow, int playerCol, Maze maze) {
+        var int head, tail, current, currentRow, currentCol;
+        var int targetId, startId, neighborId, i, nRow, nCol;
+
+        let targetId = (playerRow * 32) + playerCol;
+        let startId  = bfsInit();
+        let head = 0;
+        let tail = 1;
+
+        while (head < tail) {
+            let current    = queue[head];
+            let head       = head + 1;
+            let currentRow = current / 32;
+            let currentCol = current - (currentRow * 32);
+
+            if (current = targetId) {
+                return bfsReconstruct(targetId, startId);
+            }
+
+            let i = 0;
+            while (i < 4) {
+                let nRow = currentRow + dRow[i];
+                let nCol = currentCol + dCol[i];
+                if ((nRow > -1) & (nRow < 16) & (nCol > -1) & (nCol < 32)) {
+                    let neighborId = (nRow * 32) + nCol;
+                    if ((visited[neighborId] = 0) & maze.canMove(nRow, nCol)) {
+                        let visited[neighborId] = 1;
+                        let parent[neighborId]  = current;
+                        let queue[tail]         = neighborId;
+                        let tail                = tail + 1;
+                    }
+                }
+                let i = i + 1;
+            }
+        }
+        return startId;
+    }
+
+    method void move(int playerRow, int playerCol, Maze maze) {
+        var int nextId, nextRow, nextCol;
+        let nextId  = bfsNextStep(playerRow, playerCol, maze);
+        let nextRow = nextId / 32;
+        let nextCol = nextId - (nextRow * 32);
+        do draw(false);
+        let row = nextRow;
+        let col = nextCol;
+        do draw(true);
+        return;
+    }
+
+    // -------------------------------
+    // BFS — Nivel 2 (Maze2)
+    // -------------------------------
+
+    method int bfsNextStep2(int playerRow, int playerCol, Maze2 maze) {
+        var int head, tail, current, currentRow, currentCol;
+        var int targetId, startId, neighborId, i, nRow, nCol;
+
+        let targetId = (playerRow * 32) + playerCol;
+        let startId  = bfsInit();
+        let head = 0;
+        let tail = 1;
+
+        while (head < tail) {
+            let current    = queue[head];
+            let head       = head + 1;
+            let currentRow = current / 32;
+            let currentCol = current - (currentRow * 32);
+
+            if (current = targetId) {
+                return bfsReconstruct(targetId, startId);
+            }
+
+            let i = 0;
+            while (i < 4) {
+                let nRow = currentRow + dRow[i];
+                let nCol = currentCol + dCol[i];
+                if ((nRow > -1) & (nRow < 16) & (nCol > -1) & (nCol < 32)) {
+                    let neighborId = (nRow * 32) + nCol;
+                    if ((visited[neighborId] = 0) & maze.canMove(nRow, nCol)) {
+                        let visited[neighborId] = 1;
+                        let parent[neighborId]  = current;
+                        let queue[tail]         = neighborId;
+                        let tail                = tail + 1;
+                    }
+                }
+                let i = i + 1;
+            }
+        }
+        return startId;
+    }
+
+    method void move2(int playerRow, int playerCol, Maze2 maze) {
+        var int nextId, nextRow, nextCol;
+        let nextId  = bfsNextStep2(playerRow, playerCol, maze);
+        let nextRow = nextId / 32;
+        let nextCol = nextId - (nextRow * 32);
+        do draw(false);
+        let row = nextRow;
+        let col = nextCol;
+        do draw(true);
+        return;
+    }
+    
+    // -------------------------------
+    // DETECCION DE CAPTURA
+    // -------------------------------
+
+    method boolean isCaught(int playerRow, int playerCol) {
+        return ((row = playerRow) & (col = playerCol));
+    }
+
+    // -------------------------------
+    // DISPOSE
+    // -------------------------------
+
+    method void dispose() {
+        do queue.dispose();
+        do parent.dispose();
+        do visited.dispose();
+        do dRow.dispose();
+        do dCol.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}
