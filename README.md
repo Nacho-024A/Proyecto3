@@ -1,6 +1,6 @@
-# Laberinto — Juego en Jack / Hack
+# Maze Intelligence — Juego de Laberintos en Jack / Hack
 
-Juego de laberinto desarrollado en el lenguaje **Jack** para la plataforma **Hack** (nand2tetris). El jugador debe navegar a través de dos laberintos distintos hasta encontrar la salida marcada en cada nivel.
+Videojuego de laberinto desarrollado en el lenguaje **Jack** para la plataforma **Hack** (nand2tetris). El jugador debe navegar a través de dos laberintos evitando ser capturado por un enemigo controlado por inteligencia artificial basada en BFS (búsqueda en anchura).
 
 ---
 
@@ -10,13 +10,13 @@ Juego de laberinto desarrollado en el lenguaje **Jack** para la plataforma **Hac
 LaberintoJack/
 │
 ├── Main.jack          # Punto de entrada; orquesta el flujo de pantallas y niveles
-├── Start.jack         # Pantalla de inicio (menú principal)
-├── End.jack           # Pantalla de fin (laberinto completado)
+├── Start.jack         # Pantalla de inicio (menú principal con configuración de velocidad)
+├── GameOver.jack      # Pantalla de derrota (el enemigo capturó al jugador)
+├── End.jack           # Pantalla de victoria (ambos niveles completados)
 ├── Maze.jack          # Nivel 1 — mapa, lógica de celdas y renderizado
 ├── Maze2.jack         # Nivel 2 — mapa más complejo, misma arquitectura
-│
-├── Player.jack        # (Pendiente) Jugador: posición, movimiento, colisiones
-└── Enemy.jack         # (Pendiente) Enemigos: IA de patrullaje, detección
+├── Player.jack        # Jugador: posición, movimiento validado y sprite
+└── Enemy.jack         # Enemigo: IA con BFS para perseguir al jugador
 ```
 
 ---
@@ -24,15 +24,17 @@ LaberintoJack/
 ## Flujo del Juego
 
 ```
-Pantalla de Inicio (Start)
-        ↓  ENTER
-     Nivel 1 (Maze)
-        ↓  ENTER  ← (provisional, reemplazar por detección de salida)
-     Nivel 2 (Maze2)
-        ↓  ENTER  ← (provisional)
-  Pantalla de Fin (End)
-        ↓  ENTER
-       Cierre
+Menú de Inicio (Start)
+   ↓  seleccionar velocidad + ENTER
+Nivel 1 (Maze) — 1 enemigo
+   ↓  jugador llega a la salida
+   ↓  [si capturado → GameOver]
+Transición → ENTER para continuar
+   ↓
+Nivel 2 (Maze2) — 2 enemigos, más rápidos
+   ↓  jugador llega a la salida
+   ↓  [si capturado → GameOver]
+Pantalla de Victoria (End)
 ```
 
 ---
@@ -40,27 +42,30 @@ Pantalla de Inicio (Start)
 ## Descripción de Clases
 
 ### `Main.jack`
-Punto de entrada del programa. Instancia y ejecuta cada pantalla y nivel en orden. Actualmente usa `Keyboard.readChar()` como transición provisional entre niveles; en el futuro esto será reemplazado por la detección del jugador llegando a la celda de salida (`valor 2`).
+Punto de entrada del programa. Orquesta el flujo completo: menú → Nivel 1 → Nivel 2 → fin. Gestiona el game loop de cada nivel, el movimiento del jugador, el ciclo del enemigo, la detección de captura y la condición de victoria (llegar a la celda de salida con valor `2`). Al finalizar cada nivel libera la memoria de todas las entidades instanciadas.
 
 ### `Start.jack`
-Pantalla de bienvenida del juego.
-- Dibuja el título **LABERINTO** con gráficos pixelados (rectángulos primitivos de la API Screen).
-- Muestra las instrucciones de controles y objetivo.
-- Espera que el jugador presione **ENTER** (código de tecla `128`) para iniciar.
+Menú de inicio interactivo con tres opciones navegables con flechas:
+- **Iniciar** — comienza el juego.
+- **Configuración** — cambia la velocidad del enemigo (Lento / Normal / Rápido).
+- **Salir** — cierra el programa.
+
+El título MAZE se dibuja en pixel-art con primitivas de `Screen`. Un triángulo selector indica la opción activa. Al confirmar con ENTER retorna la velocidad seleccionada a `Main`.
 
 Métodos:
-- `Start.show()` — limpia la pantalla, dibuja y bloquea hasta ENTER.
-- `Start.draw()` — renderiza todos los elementos visuales.
+- `Start.show()` — muestra el menú, gestiona la navegación y retorna `enemySpeed`.
+
+### `GameOver.jack`
+Pantalla de derrota mostrada cuando el enemigo alcanza la misma celda que el jugador. Muestra GAME OVER en letras grandes dibujadas con rectángulos. Espera ENTER para terminar el programa.
+
+Métodos:
+- `GameOver.show()` — limpia la pantalla, dibuja y bloquea hasta ENTER.
 
 ### `End.jack`
-Pantalla de victoria, mostrada al completar el Nivel 2.
-- Dibuja el título **FIN** con letras grandes pixeladas.
-- Muestra mensaje de felicitación.
-- Espera **ENTER** para terminar el programa.
+Pantalla de victoria mostrada al completar el Nivel 2. Muestra un mensaje de felicitación y una decoración geométrica. Espera ENTER para terminar el programa.
 
 Métodos:
 - `End.show()` — limpia la pantalla, dibuja y bloquea hasta ENTER.
-- `End.draw()` — renderiza todos los elementos visuales.
 
 ### `Maze.jack` / `Maze2.jack`
 Clases que representan los dos niveles del juego. Comparten la misma arquitectura:
@@ -69,18 +74,51 @@ Clases que representan los dos niveles del juego. Comparten la misma arquitectur
 El mapa se almacena como un array 1D de 512 enteros que simula una grilla 2D de **16 filas × 32 columnas**. Cada celda es un cuadrado de **16×16 píxeles**, ocupando la pantalla completa de 512×256 px.
 
 Valores de celda:
-- `0` → Camino libre (fondo blanco con borde negro)
+- `0` → Camino libre
 - `1` → Muro (rectángulo negro sólido)
-- `2` → Salida (cuadrado pequeño marcado dentro de la celda)
+- `2` → Salida (condición de victoria al pisarla)
 
 Métodos:
 - `new()` — constructor, inicializa el array de 512 celdas.
 - `getCell(row, col)` — retorna el valor de una celda.
 - `setCell(row, col, value)` — asigna un valor a una celda.
 - `canMove(row, col)` — retorna `true` si la celda no es muro (valor ≠ 1).
-- `loadMap()` — inicializa el mapa con las coordenadas de muros y salida (código exportado desde el generador de laberintos).
+- `loadMap()` — inicializa el mapa con las coordenadas de muros y salida.
 - `draw()` — recorre todas las celdas y las dibuja en pantalla según su valor.
 - `dispose()` — libera la memoria del array y del objeto.
+
+### `Player.jack`
+Representa al jugador dentro del laberinto. Almacena su posición en fila y columna, valida el movimiento consultando `canMove()` del laberinto antes de moverse, y gestiona el sprite (borra la posición anterior y dibuja en la nueva).
+
+Métodos:
+- `new(row, col)` — constructor, inicializa la posición.
+- `move(row, col, maze)` — intenta moverse a la celda indicada si es válida.
+- `draw(show)` — dibuja (`true`) o borra (`false`) el sprite del jugador.
+- `getRow()` / `getCol()` — retornan la posición actual.
+- `dispose()` — libera el objeto.
+
+### `Enemy.jack`
+Representa a un enemigo que persigue al jugador mediante BFS. Los buffers del algoritmo (`queue`, `visited`, `parent`) se pre-asignan en el constructor y se reutilizan en cada ciclo para evitar fragmentación del heap.
+
+Métodos:
+- `new(row, col)` — constructor, inicializa posición y pre-asigna buffers BFS.
+- `move(playerRow, playerCol, maze)` — calcula y ejecuta el siguiente paso óptimo en Nivel 1.
+- `move2(playerRow, playerCol, maze2)` — ídem para Nivel 2.
+- `isCaught(playerRow, playerCol)` — retorna `true` si el enemigo ocupa la misma celda que el jugador.
+- `draw(show)` — dibuja (`true`) o borra (`false`) el sprite del enemigo.
+- `dispose()` — libera el objeto y sus buffers.
+
+---
+
+## Niveles
+
+| | Nivel 1 | Nivel 2 |
+|---|---|---|
+| Clase del mapa | `Maze` | `Maze2` |
+| Número de enemigos | 1 | 2 |
+| Velocidad del enemigo | `enemySpeed` ciclos | `enemySpeed - 2` ciclos |
+| Posición inicial jugador | (1, 1) | (1, 1) |
+| Posición inicial enemigo(s) | (14, 28) | (13, 28) y (13, 1) |
 
 ---
 
@@ -96,41 +134,34 @@ Métodos:
 
 ---
 
-## Clases Pendientes de Implementar
+## Velocidades del Enemigo
 
-### `Player.jack` *(por implementar)*
-Representará al jugador dentro del laberinto.
+Configurable desde el menú antes de iniciar el juego:
 
-Responsabilidades previstas:
-- Almacenar la posición actual en términos de fila y columna (`row`, `col`).
-- Leer input de teclado en cada ciclo de juego.
-- Consultar `canMove(row, col)` del Maze actual antes de moverse.
-- Dibujarse en pantalla (borrar posición anterior, pintar nueva posición).
-- Detectar si la celda destino es la salida (`valor 2`) para notificar a `Main` que el nivel terminó.
+| Opción | Ciclos entre movimientos |
+|--------|--------------------------|
+| Lento | 8 |
+| Normal (por defecto) | 6 |
+| Rápido | 4 |
 
-### `Enemy.jack` *(por implementar)*
-Representará a uno o más enemigos que patrullan el laberinto.
-
-Responsabilidades previstas:
-- Almacenar posición y dirección de movimiento.
-- Implementar lógica de movimiento automático (patrullaje por pasillo, rebote en muros).
-- Detectar colisión con el jugador para terminar la partida.
-- Dibujarse y borrarse cada turno/ciclo.
+En el Nivel 2 los enemigos se mueven siempre 2 ciclos más rápido que el valor configurado.
 
 ---
 
-##  Arquitectura General
+## Arquitectura General
 
 ```
 Main
- ├── Start          (pantalla de inicio)
- ├── Maze           (nivel 1)
- │    ├── Player    (se mueve sobre Maze)
- │    └── Enemy     (patrulla sobre Maze)
- ├── Maze2          (nivel 2)
- │    ├── Player    (reutilizado)
- │    └── Enemy     (puede ser más agresivo)
- └── End            (pantalla de fin)
+ ├── Start            (menú: retorna enemySpeed)
+ ├── Maze             (nivel 1)
+ │    ├── Player      (se mueve sobre Maze)
+ │    └── Enemy       (persigue al jugador con BFS)
+ ├── Maze2            (nivel 2)
+ │    ├── Player      (re-instanciado)
+ │    ├── Enemy [0]   (esquina derecha)
+ │    └── Enemy [1]   (esquina izquierda)
+ ├── GameOver         (derrota: enemigo captura al jugador)
+ └── End              (victoria: jugador completa el Nivel 2)
 ```
 
 ---
@@ -149,6 +180,12 @@ Este proyecto usa el compilador de Jack de **nand2tetris**.
 
 Requisitos: nand2tetris Software Suite (disponible en [nand2tetris.org](https://www.nand2tetris.org)).
 
+Otra opcion valida es:
+
+1. Colocar todos los archivo `.jack` en una misma carpeta.
+2. Cargar dicha carpeta en `https://nand2tetris.github.io/web-ide/compiler` desde el editor online de Nand2Tetris.
+3. Compilar y correr dentro del mismo Nand2Tetris Web
+
 ---
 
 ## Detalles Técnicos
@@ -161,12 +198,15 @@ Requisitos: nand2tetris Software Suite (disponible en [nand2tetris.org](https://
 | Tamaño de celda | 16 × 16 px |
 | Grilla del laberinto | 16 filas × 32 columnas |
 | Total de celdas | 512 |
-| Almacenamiento del mapa | Array 1D con índice `row * cols + col` |
+| Almacenamiento del mapa | Array 1D con índice `row * 32 + col` |
+| Algoritmo de IA | BFS (Breadth-First Search) con buffers reutilizables |
+| Número de niveles | 2 |
 
 ---
 
 ## Autores
 
-Proyecto desarrollado como parte del curso **nand2tetris**
-Andres David Osorio Moreno
-Daniel Mauricio Giraldo Moreno
+Proyecto desarrollado como parte del curso **Organización de Computadores** — Universidad EAFIT, 2026.
+
+- Andrés David Osorio Moreno
+- Daniel Mauricio Giraldo Moreno
